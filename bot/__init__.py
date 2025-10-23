@@ -13,7 +13,7 @@
 # License can be found in <
 # https://github.com/Nubuki-all/Enc/blob/main/License> .
 
-_bot.quality_settings = {}
+
 import argparse
 import asyncio
 import glob
@@ -53,6 +53,7 @@ from telethon.utils import pack_bot_file_id
 
 from .config import _bot, conf
 
+_bot.quality_settings = {}
 batch_lock = asyncio.Lock()
 bot_id = conf.BOT_TOKEN.split(":", 1)[0]
 botStartTime = time.time()
