@@ -13,14 +13,15 @@
 # License can be found in
 # <https://github.com/Nubuki-all/Enc/blob/main/License> .
 
-from bot.startup.before import qualitydb
 from bot.utils.db_utils import save2db2
 
 
 def set_quality(user_id, new_quality):
+    from bot.startup.before import qualitydb
     qualitydb[user_id] = new_quality
     save2db2(qualitydb, "quality")
 
 
 def get_quality(user_id):
+    from bot.startup.before import qualitydb
     return qualitydb.get(user_id)

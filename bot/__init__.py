@@ -13,7 +13,7 @@
 # License can be found in <
 # https://github.com/Nubuki-all/Enc/blob/main/License> .
 
-
+_bot.quality_settings = {}
 import argparse
 import asyncio
 import glob

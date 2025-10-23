@@ -139,6 +139,7 @@ if conf.DATABASE_URL:
     load_db(filterdb, "filter", filter_file)
     load_db(ffmpegdb, "mux_args", mux_file)
     load_db(rssdb, "rss", _bot.rss_dict, "dict")
+    load_db(qualitydb, "quality", _bot.quality_settings, "dict")
     other_ff = [
         ("ffmpeg2", ffmpeg_file2),
         ("ffmpeg3", ffmpeg_file3),
