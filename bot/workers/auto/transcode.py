@@ -18,6 +18,7 @@ from bot.utils.bot_utils import encode_job as ejob
 from bot.utils.bot_utils import get_bqueue, get_queue, get_var, hbs
 from bot.utils.bot_utils import time_formatter as tf
 from bot.utils.db_utils import save2db
+from bot.utils.quality_utils import get_quality
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
     bc_msg,
@@ -319,6 +320,23 @@ async def thing():
         with open(param_file, "r") as file:
             nani = file.read().rstrip()
         ffmpeg = await another(nani, title, epi, sn, metadata_name, dl)
+
+        quality = get_quality(sender_id)
+        if quality:
+            if quality == "144p":
+                ffmpeg += " -vf scale=256:144 -b:v 500k"
+            elif quality == "240p":
+                ffmpeg += " -vf scale=426:240 -b:v 700k"
+            elif quality == "360p":
+                ffmpeg += " -vf scale=640:360 -b:v 1000k"
+            elif quality == "480p":
+                ffmpeg += " -vf scale=854:480 -b:v 1500k"
+            elif quality == "720p":
+                ffmpeg += " -vf scale=1280:720 -b:v 2500k"
+            elif quality == "1080p":
+                ffmpeg += " -vf scale=1920:1080 -b:v 5000k"
+            elif quality == "2160p":
+                ffmpeg += " -vf scale=3840:2160 -b:v 10000k"
 
         _set = time.time()
         einfo.current = file_name

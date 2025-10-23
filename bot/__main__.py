@@ -23,7 +23,17 @@ from .startup.after import on_startup
 from .utils.msg_utils import event_handler
 from .workers.handlers.dev import bash
 from .workers.handlers.dev import eval as eval_
-from .workers.handlers.dev import eval_message_p
+from .workers.handlers.dev import (
+    eval_message_p,
+    quality_1080p,
+    quality_144p,
+    quality_2160p,
+    quality_240p,
+    quality_360p,
+    quality_480p,
+    quality_720p,
+    quality_default,
+)
 from .workers.handlers.e_callbacks import pres, skip, skip_jobs, stats
 from .workers.handlers.manage import (
     allowgroupenc,
@@ -148,6 +158,49 @@ async def _(e):
 @tele.on(events.NewMessage(pattern=command(["status"])))
 async def _(e):
     await event_handler(e, status)
+
+
+####### QUALITY CMDS #######
+
+
+@tele.on(events.NewMessage(pattern=command(["144p"])))
+async def _(e):
+    await event_handler(e, quality_144p)
+
+
+@tele.on(events.NewMessage(pattern=command(["240p"])))
+async def _(e):
+    await event_handler(e, quality_240p)
+
+
+@tele.on(events.NewMessage(pattern=command(["360p"])))
+async def _(e):
+    await event_handler(e, quality_360p)
+
+
+@tele.on(events.NewMessage(pattern=command(["480p"])))
+async def _(e):
+    await event_handler(e, quality_480p)
+
+
+@tele.on(events.NewMessage(pattern=command(["720p"])))
+async def _(e):
+    await event_handler(e, quality_720p)
+
+
+@tele.on(events.NewMessage(pattern=command(["1080p"])))
+async def _(e):
+    await event_handler(e, quality_1080p)
+
+
+@tele.on(events.NewMessage(pattern=command(["2160p"])))
+async def _(e):
+    await event_handler(e, quality_2160p)
+
+
+@tele.on(events.NewMessage(pattern=command(["defaultq"])))
+async def _(e):
+    await event_handler(e, quality_default)
 
 
 ####### POWER CMDS #######

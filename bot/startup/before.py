@@ -128,6 +128,7 @@ if conf.DATABASE_URL:
     filterdb = db["filter"]
     rssdb = db["rss"]
     userdb = db["users"]
+    qualitydb = db["quality"]
 
     load_db(queuedb, "batches", _bot.batch_queue, "dict")
     load_db(queuedb, "queue", _bot.queue, "dict")

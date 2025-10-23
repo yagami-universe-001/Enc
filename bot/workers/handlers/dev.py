@@ -7,6 +7,55 @@ import traceback
 from bot.config import _bot
 from bot.utils.msg_utils import user_is_dev, user_is_owner
 from bot.utils.os_utils import s_remove
+from bot.utils.quality_utils import set_quality
+
+
+async def quality_144p(event, cmd, client):
+    """Set the video quality to 144p."""
+    set_quality(event.sender_id, "144p")
+    await event.reply("Video quality set to 144p.")
+
+
+async def quality_240p(event, cmd, client):
+    """Set the video quality to 240p."""
+    set_quality(event.sender_id, "240p")
+    await event.reply("Video quality set to 240p.")
+
+
+async def quality_360p(event, cmd, client):
+    """Set the video quality to 360p."""
+    set_quality(event.sender_id, "360p")
+    await event.reply("Video quality set to 360p.")
+
+
+async def quality_480p(event, cmd, client):
+    """Set the video quality to 480p."""
+    set_quality(event.sender_id, "480p")
+    await event.reply("Video quality set to 480p.")
+
+
+async def quality_720p(event, cmd, client):
+    """Set the video quality to 720p."""
+    set_quality(event.sender_id, "720p")
+    await event.reply("Video quality set to 720p.")
+
+
+async def quality_1080p(event, cmd, client):
+    """Set the video quality to 1080p."""
+    set_quality(event.sender_id, "1080p")
+    await event.reply("Video quality set to 1080p.")
+
+
+async def quality_2160p(event, cmd, client):
+    """Set the video quality to 2160p."""
+    set_quality(event.sender_id, "2160p")
+    await event.reply("Video quality set to 2160p.")
+
+
+async def quality_default(event, cmd, client):
+    """Set the video quality to the default."""
+    set_quality(event.sender_id, None)
+    await event.reply("Video quality set to default.")
 
 
 async def eval(event, cmd, client):

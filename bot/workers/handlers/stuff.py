@@ -331,7 +331,18 @@ groupenc{s} - turn off/on encoding in groups
 cancelall{s} - ❌ clear cached downloads & queued files
 clear{s} - clear queued files
 logs{s} - get bot logs
-help{s} - same as start`
+help{s} - same as start
+
+Quality:
+144p{s} - set video quality to 144p
+240p{s} - set video quality to 240p
+360p{s} - set video quality to 360p
+480p{s} - set video quality to 480p
+720p{s} - set video quality to 720p
+1080p{s} - set video quality to 1080p
+2160p{s} - set video quality to 2160p
+defaultq{s} - set video quality to default
+`
 
 All above commands accept '-h' / '--help' arguments to get more detailed help about each command.
         """,
