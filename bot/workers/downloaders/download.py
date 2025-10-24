@@ -128,19 +128,15 @@ class Downloader:
             if self.dl_folder:
                 self.path = dl = self.dl_folder + dl
             if message:
-                self.time = ttt = time.time()
-                media_type = str(message.media)
-                if media_type == "MessageMediaType.DOCUMENT":
-                    media_mssg = "`Downloading a file…`"
-                else:
-                    media_mssg = "`Downloading a video…`"
-                download_task = await pyro.download_media(
+                self.time = time.time()
+                self.message = message  # Store the message object for the progress callback
+                download_task = await tele.download_media(
                     message=message,
-                    file_name=dl,
-                    progress=self.progress_for_pyrogram,
-                    progress_args=(pyro, media_mssg, e, ttt),
+                    file=dl,
+                    progress_callback=self._telethon_progress_callback
                 )
             else:
+                # This branch seems to be for pyrogram only, so we leave it as is
                 download_task = await pyro.download_media(
                     message=file,
                     file_name=dl,
@@ -294,23 +290,31 @@ class Downloader:
             await logger(Exception)
             return None
 
-    async def progress_for_pyrogram(self, current, total, app, ud_type, message, start):
+    async def _telethon_progress_callback(self, current, total):
+        # This is the callback function for telethon
+        # It will call the main progress update logic
+        await self.update_progress(current, total)
+
+    async def update_progress(self, current, total):
+        # This is the main progress update logic, refactored to be client-agnostic
+        ud_type = "`Downloading a video…`"
+        start = self.time
+        message = self.message
+
         fin_str = enhearts()
         now = time.time()
         diff = now - start
+
         if self.is_cancelled:
-            app.stop_transmission()
+            # This is a bit of a hack, but telethon doesn't have a simple stop_transmission
+            # We raise an error to stop the download
+            raise Exception("Download cancelled")
+
         if round(diff % 10.00) == 0 or current == total:
             percentage = current * 100 / total
-            status = "downloads" + "/status.json"
-            if os.path.exists(status):
-                with open(status, "r+") as f:
-                    statusMsg = json.load(f)
-                    if not statusMsg["running"]:
-                        app.stop_transmission()
             elapsed_time = time_formatter(diff)
             speed = current / diff
-            time_to_completion = time_formatter(int((total - current) / speed))
+            time_to_completion = time_formatter(int((total - current) / speed)) if speed > 0 else "N/A"
 
             progress = "```\n{0}{1}```\n<b>Progress:</b> `{2}%`\n".format(
                 "".join([fin_str for i in range(math.floor(percentage / 10))]),
@@ -326,14 +330,13 @@ class Downloader:
                     hbs(current),
                     hbs(total),
                     hbs(speed),
-                    time_to_completion if time_to_completion else "0 s",
+                    time_to_completion,
                     elapsed_time if elapsed_time != "" else "0 s",
                 )
             )
             try:
                 # Attach the button to the message with an inline keyboard
                 reply_markup = []
-                # file_name = self.file_name.split("/")[-1]
                 dl_info = await parse_dl(self.file_name)
                 (
                     info_button,
@@ -351,21 +354,18 @@ class Downloader:
                     reply_markup.extend(([more_button], [back_button], [cancel_button]))
                     dsp = dl_info
                 reply_markup = InlineKeyboardMarkup(reply_markup)
-                if not message.photo:
-                    self.message = await message.edit_text(
-                        text=dsp,
-                        reply_markup=reply_markup,
-                    )
-                else:
-                    self.message = await message.edit_caption(
-                        caption=dsp,
-                        reply_markup=reply_markup,
-                    )
-            except pyro_errors.FloodWait as e:
-                await asyncio.sleep(e.value)
-            except BaseException:
+
+                # Use the stored message object to edit
+                if self.message and hasattr(self.message, 'edit'):
+                    await self.message.edit(dsp, buttons=self.gen_buttons())
+
+            except errors.rpcerrorlist.MessageNotModifiedError:
+                pass
+            except errors.FloodWaitError as e:
+                await asyncio.sleep(e.seconds)
+            except Exception:
                 await logger(Exception)
-                # debug
+
 
     async def progress_for_aria2(self, download, start, message, silent=False):
         try:
