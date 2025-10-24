@@ -41,10 +41,21 @@ async def add_subtitles(event, args, client):
         input_file = await event.client.download_media(video_message)
         subtitle_file = await event.client.download_media(event.message)
         output_file = f"subtitled_{os.path.basename(input_file)}"
-        cmd = f"ffmpeg -i '{input_file}' -i '{subtitle_file}' -c copy -c:s mov_text '{output_file}'"
+        cmd = [
+            "ffmpeg",
+            "-i",
+            input_file,
+            "-i",
+            subtitle_file,
+            "-c",
+            "copy",
+            "-c:s",
+            "mov_text",
+            output_file,
+        ]
 
         encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-        await encoder.start(cmd)
+        await encoder.start(" ".join(cmd))
         await encoder.callback(input_file, output_file, event, user_id)
         stdout, stderr = await encoder.await_completion()
 
@@ -83,10 +94,17 @@ async def add_hardcoded_subtitles(event, args, client):
         input_file = await event.client.download_media(video_message)
         subtitle_file = await event.client.download_media(event.message)
         output_file = f"hardcoded_subtitled_{os.path.basename(input_file)}"
-        cmd = f"ffmpeg -i '{input_file}' -vf 'subtitles={subtitle_file}' '{output_file}'"
+        cmd = [
+            "ffmpeg",
+            "-i",
+            input_file,
+            "-vf",
+            f"subtitles={subtitle_file}",
+            output_file,
+        ]
 
         encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-        await encoder.start(cmd)
+        await encoder.start(" ".join(cmd))
         await encoder.callback(input_file, output_file, event, user_id)
         stdout, stderr = await encoder.await_completion()
 
@@ -114,10 +132,10 @@ async def remove_subtitles(event, args, client, reply_message):
     user_id = event.sender_id
     input_file = await event.client.download_media(reply_message)
     output_file = f"no_subtitles_{os.path.basename(input_file)}"
-    cmd = f"ffmpeg -i '{input_file}' -sn '{output_file}'"
+    cmd = ["ffmpeg", "-i", input_file, "-sn", output_file]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(cmd)
+    await encoder.start(" ".join(cmd))
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -155,10 +173,10 @@ async def extract_subtitles(event, args, client, reply_message):
     for stream in subtitle_streams:
         index = stream["index"]
         output_file = f"subtitle_{index}.srt"
-        cmd = f"ffmpeg -i '{input_file}' -map 0:{index} '{output_file}'"
+        cmd = ["ffmpeg", "-i", input_file, "-map", f"0:{index}", output_file]
 
         encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-        await encoder.start(cmd)
+        await encoder.start(" ".join(cmd))
         await encoder.callback(input_file, output_file, event, user_id)
         stdout, stderr = await encoder.await_completion()
 

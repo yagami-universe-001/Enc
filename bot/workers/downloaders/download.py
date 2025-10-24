@@ -355,9 +355,13 @@ class Downloader:
                     dsp = dl_info
                 reply_markup = InlineKeyboardMarkup(reply_markup)
 
-                # Use the stored message object to edit
-                if self.message and hasattr(self.message, 'edit'):
-                    await self.message.edit(dsp, buttons=self.gen_buttons())
+                # Use the telethon client to edit the message
+                if self.message:
+                    await tele.edit_message(
+                        self.message,
+                        dsp,
+                        buttons=self.gen_buttons()
+                    )
 
             except errors.rpcerrorlist.MessageNotModifiedError:
                 pass

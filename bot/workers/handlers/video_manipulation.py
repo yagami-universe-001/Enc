@@ -32,10 +32,19 @@ async def compress_video(event, args, client, reply_message):
     user_id = event.sender_id
     input_file = await event.client.download_media(reply_message)
     output_file = f"compressed_{os.path.basename(input_file)}"
-    cmd = f"ffmpeg -i '{input_file}' -c:v libx265 -crf 28 '{output_file}'"
+    cmd = [
+        "ffmpeg",
+        "-i",
+        input_file,
+        "-c:v",
+        "libx265",
+        "-crf",
+        "28",
+        output_file,
+    ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(cmd)
+    await encoder.start(" ".join(cmd))
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -68,10 +77,21 @@ async def cut_video(event, args, client, reply_message):
 
     input_file = await event.client.download_media(reply_message)
     output_file = f"cut_{os.path.basename(input_file)}"
-    cmd = f"ffmpeg -i '{input_file}' -ss {start_time} -to {end_time} -c copy '{output_file}'"
+    cmd = [
+        "ffmpeg",
+        "-i",
+        input_file,
+        "-ss",
+        start_time,
+        "-to",
+        end_time,
+        "-c",
+        "copy",
+        output_file,
+    ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(cmd)
+    await encoder.start(" ".join(cmd))
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -103,10 +123,17 @@ async def crop_video(event, args, client, reply_message):
 
     input_file = await event.client.download_media(reply_message)
     output_file = f"cropped_{os.path.basename(input_file)}"
-    cmd = f"ffmpeg -i '{input_file}' -vf 'crop={width}:{height}:{x}:{y}' '{output_file}'"
+    cmd = [
+        "ffmpeg",
+        "-i",
+        input_file,
+        "-vf",
+        f"crop={width}:{height}:{x}:{y}",
+        output_file,
+    ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(cmd)
+    await encoder.start(" ".join(cmd))
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -132,7 +159,11 @@ async def rename_video(event, args, client, reply_message):
         return await event.reply("Please provide a new name for the video.")
 
     input_file = await event.client.download_media(reply_message)
-    output_file = f"{args}{os.path.splitext(input_file)[1]}"
+
+    # Sanitize the new name to prevent path traversal
+    new_name = os.path.basename(args)
+    output_file = f"{new_name}{os.path.splitext(input_file)[1]}"
+
     os.rename(input_file, output_file)
 
     await event.client.send_file(event.chat_id, output_file)
@@ -171,15 +202,27 @@ async def merge_videos(event, args, client):
     input_files = [await event.client.download_media(m) for m in _merging_sessions[user_id]]
     output_file = f"merged_{os.path.basename(input_files[0])}"
 
-    inputs = " ".join([f"-i '{f}'" for f in input_files])
+    cmd = ["ffmpeg"]
+    for f in input_files:
+        cmd.extend(["-i", f])
+
     filter_complex = "".join(
         [f"[{i}:v] [{i}:a]" for i in range(len(input_files))]
     )
     filter_complex += f" concat=n={len(input_files)}:v=1:a=1 [v] [a]"
-    cmd = f"ffmpeg {inputs} -filter_complex '{filter_complex}' -map '[v]' -map '[a]' '{output_file}'"
+
+    cmd.extend([
+        "-filter_complex",
+        filter_complex,
+        "-map",
+        "[v]",
+        "-map",
+        "[a]",
+        output_file,
+    ])
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(cmd)
+    await encoder.start(" ".join(cmd))
     await encoder.callback(input_files[0], output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 

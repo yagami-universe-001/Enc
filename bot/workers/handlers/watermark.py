@@ -76,10 +76,19 @@ async def add_watermark(event, args, client):
 
     input_file = await event.client.download_media(reply_message)
     output_file = f"watermarked_{os.path.basename(input_file)}"
-    cmd = f"ffmpeg -i '{input_file}' -i watermark.png -filter_complex '[0:v][1:v]overlay=10:10' '{output_file}'"
+    cmd = [
+        "ffmpeg",
+        "-i",
+        input_file,
+        "-i",
+        "watermark.png",
+        "-filter_complex",
+        "[0:v][1:v]overlay=10:10",
+        output_file,
+    ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(cmd)
+    await encoder.start(" ".join(cmd))
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -107,10 +116,17 @@ async def spoiler(event, args, client):
 
     input_file = await event.client.download_media(reply_message)
     output_file = f"spoiler_{os.path.basename(input_file)}"
-    cmd = f"ffmpeg -i '{input_file}' -vf 'boxblur=10' '{output_file}'"
+    cmd = [
+        "ffmpeg",
+        "-i",
+        input_file,
+        "-vf",
+        "boxblur=10",
+        output_file,
+    ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(cmd)
+    await encoder.start(" ".join(cmd))
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
