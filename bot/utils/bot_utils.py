@@ -512,14 +512,35 @@ async def post_to_tgph(title, out):
 
 
 def get_filename(message):
-    media_type = str(message.media)
-    if media_type == "MessageMediaType.VIDEO":
-        doc = message.video
-    else:
-        doc = message.document
-    mcap = message.caption
-    mpcap = None if mcap and "\n" in mcap else mcap
-    file_name = mpcap if mpcap and not Path(caption_file).is_file() else doc.file_name
+    try:
+        import pyrogram
+        is_pyrogram = isinstance(message, pyrogram.types.Message)
+    except ImportError:
+        is_pyrogram = False
+
+    if is_pyrogram:
+        media_type = str(message.media)
+        if media_type == "MessageMediaType.VIDEO":
+            doc = message.video
+        else:
+            doc = message.document
+        mcap = message.caption
+        file_name_from_doc = doc.file_name if doc else None
+    else:  # telethon
+        if message.video:
+            doc = message.video
+        else:
+            doc = message.document
+        mcap = message.text
+        file_name_from_doc = None
+        if doc and hasattr(doc, 'attributes'):
+            for attr in doc.attributes:
+                if hasattr(attr, 'file_name'):
+                    file_name_from_doc = attr.file_name
+                    break
+
+    mpcap = None if mcap and "\\n" in mcap else mcap
+    file_name = mpcap if mpcap and not Path(caption_file).is_file() else file_name_from_doc
     if not file_name:
         file_name = "video_" + dt.now().isoformat("_", "seconds") + ".mp4"
     root, ext = os.path.splitext(file_name)
