@@ -747,11 +747,6 @@ async def _(e):
 ########## AUTO ###########
 
 
-@tele.on(events.NewMessage(incoming=True))
-async def _(e):
-    await event_handler(e, save_thumb, disable_help=True)
-
-
 # @tele.on(events.NewMessage(incoming=True))
 # async def _(e):
 #    await encod(e)
