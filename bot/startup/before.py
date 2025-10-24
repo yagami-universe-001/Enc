@@ -150,7 +150,7 @@ if conf.DATABASE_URL:
 
 
 else:
-    queuedb = ffmpegdb = filterdb = rssdb = userdb = None
+    queuedb = ffmpegdb = filterdb = rssdb = userdb = qualitydb = None
 
     load_local_db()
 

@@ -15,13 +15,23 @@
 
 from bot.utils.db_utils import save2db2
 
+quality_settings = {}
+
 
 def set_quality(user_id, new_quality):
     from bot.startup.before import qualitydb
-    qualitydb[user_id] = new_quality
-    save2db2(qualitydb, "quality")
+
+    if qualitydb:
+        qualitydb[user_id] = new_quality
+        save2db2(qualitydb, "quality")
+    else:
+        quality_settings[user_id] = new_quality
 
 
 def get_quality(user_id):
     from bot.startup.before import qualitydb
-    return qualitydb.get(user_id)
+
+    if qualitydb:
+        return qualitydb.get(user_id)
+    else:
+        return quality_settings.get(user_id)

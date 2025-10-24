@@ -71,6 +71,7 @@ from .workers.handlers.queue import (
     enselect,
     listqueue,
     pencode,
+    pencode_callback,
 )
 from .workers.handlers.rebut import (
     en_airing,
@@ -352,6 +353,11 @@ async def _(e):
 @tele.on(events.callbackquery.CallbackQuery(data=re.compile("beck")))
 async def _(e):
     await beck(e)
+
+
+@tele.on(events.callbackquery.CallbackQuery(data=re.compile(b"quality_(.*)")))
+async def _(e):
+    await pencode_callback(e)
 
 
 ########## Direct ###########

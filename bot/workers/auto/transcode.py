@@ -166,7 +166,11 @@ async def thing():
         download = None
         log_channel = conf.LOG_CHANNEL
         name, u_msg, v_f = list(queue.values())[0]
-        v, f, m, n, au = v_f
+        if len(v_f) == 6:
+            v, f, m, n, au, quality = v_f
+        else:
+            v, f, m, n, au = v_f
+            quality = None
         ani = au[0]
         einfo.uri = au[1]
         param_file = ejob.pending()
@@ -321,7 +325,8 @@ async def thing():
             nani = file.read().rstrip()
         ffmpeg = await another(nani, title, epi, sn, metadata_name, dl)
 
-        quality = get_quality(sender_id)
+        if not quality:
+            quality = get_quality(sender_id)
         if quality:
             if quality == "144p":
                 ffmpeg += " -vf scale=256:144 -b:v 500k"

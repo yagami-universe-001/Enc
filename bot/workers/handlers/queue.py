@@ -29,6 +29,7 @@ from bot.utils.bot_utils import (
 from bot.utils.db_utils import save2db
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
+    Button,
     get_args,
     msg_sleep_delete,
     try_delete,
@@ -298,6 +299,7 @@ async def enleech(event, args: str, client, direct=False):
                                         ("aria2", mode),
                                         force_name,
                                         (anilist, uri),
+                                        None,
                                     ),
                                 ]
                             }
@@ -344,6 +346,7 @@ async def enleech(event, args: str, client, direct=False):
                             ("aria2", mode),
                             force_name,
                             (anilist, uri),
+                            None,
                         ),
                     ]
                 }
@@ -544,6 +547,7 @@ async def enleech2(event, args: str, client, direct=False):
                                         ("qbit", mode),
                                         force_name,
                                         (anilist, uri),
+                                        None,
                                     ),
                                 ]
                             }
@@ -619,6 +623,7 @@ async def enleech2(event, args: str, client, direct=False):
                             ("qbit", mode),
                             force_name,
                             (anilist, uri),
+                            None,
                         ),
                     ]
                 }
@@ -757,30 +762,62 @@ async def pencode(message, args=None, sender_id=None, flag=None):
         if message.document:
             if message.document.mime_type not in video_mimetype:
                 return
-        if get_queue() or bot_is_paused():
-            xxx = await message.reply("`Adding To Queue`", quote=True)
+
+        buttons = [
+            [
+                Button.inline("144p", data=f"quality_144p_{message.id}"),
+                Button.inline("240p", data=f"quality_240p_{message.id}"),
+                Button.inline("360p", data=f"quality_360p_{message.id}"),
+                Button.inline("480p", data=f"quality_480p_{message.id}"),
+            ],
+            [
+                Button.inline("720p", data=f"quality_720p_{message.id}"),
+                Button.inline("1080p", data=f"quality_1080p_{message.id}"),
+                Button.inline("2160p", data=f"quality_2160p_{message.id}"),
+                Button.inline("Default", data=f"quality_default_{message.id}"),
+            ],
+        ]
+        await message.reply("Please select a quality to encode the video to:", buttons=buttons)
+    except BaseException:
+        await logger(BaseException)
+
+
+async def pencode_callback(event):
+    try:
+        quality, message_id = event.data.decode().split("_")[1:]
+        message = await event.client.get_messages(event.chat_id, ids=int(message_id))
+        if not message:
+            return await event.answer("This message is no longer available.", alert=True)
+
+        sender_id = event.sender_id
+        chat_id = event.chat_id
         name = get_filename(message)
         queue = get_queue()
+
         for item in queue.values():
             if name in item:
-                return await xxx.edit("**THIS FILE HAS ALREADY BEEN ADDED TO QUEUE**")
+                return await event.answer("This file is already in the queue.", alert=True)
+
+        if quality == "default":
+            quality = None
+
+        args = message.caption
         anilist = True
         cust_fil = cust_v = str()
         force_name = None
         uri = None
         if args:
-            if not flag:
-                flag, args = get_args(
-                    ["-da", "store_false"],
-                    "-f",
-                    "-rm",
-                    "-n",
-                    "-tc",
-                    "-tf",
-                    "-v",
-                    to_parse=args,
-                    get_unknown=True,
-                )
+            flag, args = get_args(
+                ["-da", "store_false"],
+                "-f",
+                "-rm",
+                "-n",
+                "-tc",
+                "-tf",
+                "-v",
+                to_parse=args,
+                get_unknown=True,
+            )
             if flag.rm or flag.tc or flag.tf:
                 cust_fil = flag.rm or "disabled__"
                 cust_fil += str().join(
@@ -791,6 +828,7 @@ async def pencode(message, args=None, sender_id=None, flag=None):
             anilist = flag.da
             cust_v = flag.v
             force_name = flag.n
+
         queue.update(
             {
                 (chat_id, message.id): [
@@ -802,19 +840,16 @@ async def pencode(message, args=None, sender_id=None, flag=None):
                         ("tg", "None"),
                         force_name,
                         (anilist, uri),
+                        quality,
                     ),
                 ]
             }
         )
         await save2db()
-        if len(queue) > 1 or bot_is_paused():
-            await xxx.edit(
-                f"**Added To Queue ⏰, POS:** `{len(queue)-1}` \n`Please Wait , Encode will start soon`"
-            )
-        await add_multi(message, args, sender_id, flag)
-        return
-    except BaseException:
-        await logger(BaseException)
+        await event.edit(f"Added to queue with quality: {quality or 'default'}")
+    except Exception as e:
+        await logger(e)
+        await event.answer("An error occurred.", alert=True)
 
 
 async def add_multi(message, args, sender_id, flag):
