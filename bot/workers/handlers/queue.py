@@ -1,6 +1,6 @@
 from pyrogram.types import Message
 
-from bot import asyncio, dl_pause, errors, itertools, queue_lock
+from bot import asyncio, dl_pause, errors, itertools, queue_lock, tele
 from bot.fun.quips import enquip4
 from bot.utils.ani_utils import qparse
 from bot.utils.batch_utils import batch_preview, clean_batch
@@ -777,7 +777,12 @@ async def pencode(message, args=None, sender_id=None, flag=None):
                 Button.inline("Default", data=f"quality_default_{message.id}"),
             ],
         ]
-        await message.reply("Please select a quality to encode the video to:", buttons=buttons)
+        await tele.send_message(
+            message.chat.id,
+            "Please select a quality to encode the video to:",
+            buttons=buttons,
+            reply_to=message.id,
+        )
     except BaseException:
         await logger(BaseException)
 
