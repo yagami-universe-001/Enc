@@ -806,7 +806,7 @@ async def pencode_callback(event):
         if quality == "default":
             quality = None
 
-        args = message.caption
+        args = message.text
         anilist = True
         cust_fil = cust_v = str()
         force_name = None
