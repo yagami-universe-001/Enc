@@ -787,3 +787,9 @@ async def sync_to_async(func, *args, wait=True, **kwargs):
     loop = asyncio.get_event_loop()
     future = loop.run_in_executor(THREADPOOL, pfunc)
     return await future if wait else future
+
+
+def run_sync_in_thread(func, *args, **kwargs):
+    """Run a synchronous function in a separate thread."""
+    loop = asyncio.get_event_loop()
+    return loop.run_in_executor(THREADPOOL, lambda: func(*args, **kwargs))

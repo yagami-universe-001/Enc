@@ -13,12 +13,10 @@
 # License can be found in
 # <https://github.com/Nubuki-all/Enc/blob/main/License> .
 
-from bot.utils.msg_utils import user_is_allowed
-
-
-from bot.workers.encoder import Encoder
-
-
+from bot.utils.msg_utils import user_is_allowed, user_is_owner
+from bot.workers.encoders.encode import Encoder
+from bot.utils.ffmpeg_utils import get_media_info as get_media_info_func
+from bot.config import conf
 import os
 
 
@@ -48,17 +46,6 @@ async def set_media_type(event, args, client):
     await event.client.send_file(event.chat_id, input_file, force_document=(media_type == "document"))
 
     os.remove(input_file)
-
-
-import os
-
-
-
-
-from bot.utils.bot_utils import run_sync_in_thread
-from bot.utils.ffmpeg_utils import get_media_info as get_media_info_func
-from bot.config import conf
-from bot.utils.msg_utils import user_is_owner
 
 
 async def upload_file(event, args, client):
