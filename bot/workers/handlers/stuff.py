@@ -124,7 +124,6 @@ async def start(event, args, client):
     await event.reply(
         msg,
         buttons=[
-            [Button.inline("Help", data="ihelp")],
             [
                 Button.url(
                     "Source-Code (Original)",
@@ -135,59 +134,18 @@ async def start(event, args, client):
             [Button.url("Fork Maintainer", url="t.me/Col_serra")],
         ],
     )
+
+
+from bot.workers.handlers.help_text import HELP_TEXT
 
 
 async def help(event, args, client):
-    return await start(event, args, client)
-
-
-async def ihelp(event):
-    await event.edit(
-        "**⛩️ An Encode bot**\n\n+"
-        "This bot encodes videos With your custom ffmpeg or handbrake-cli settings."
-        "\n+Easy to Use (Depends)\n"
-        "-Due to your custom Settings & hosting server bot may or may not take a long time to encode"
-        ".\n\nJust Forward a Video…/videos"
-        "\n\nFor available commands click the Commands button below.",
-        buttons=[
-            [Button.inline("Commands", data="icommands")],
-            [Button.inline("🔙 Back", data="beck")],
-        ],
-    )
-
-
-async def beck(event):
-    sender = event.query.user_id
-    currentTime = tf(time.time() - botStartTime)
-    msg = ""
-    msg1 = f"Hi `{event.sender.first_name}`\n"
-    msg2 = (
-        f"{msg1}I've been alive for `{currentTime}` and i'm ready to encode videos 😗"
-    )
-    msg3 = f"{msg2}\nand by the way you're a temporary user"
-    if temp_is_allowed(sender):
-        msg = msg3
-    elif not user_is_allowed(sender):
-        priv = await event.client.get_entity(int(conf.OWNER.split()[0]))
-        msg = f"{msg1}You're not allowed access to this bot"
-        msg += f"\nAsk [{priv.first_name}](tg://user?id={conf.OWNER.split()[0]}) "
-        msg += "(nicely) to grant you access."
-    if not msg:
-        msg = msg2
-    await event.edit(
-        msg,
-        buttons=[
-            [Button.inline("Help", data="ihelp")],
-            [
-                Button.url(
-                    "Source-Code (Original)",
-                    url="github.com/1Danish-00/compressorqueue",
-                ),
-                Button.url("Developer (Original)", url="t.me/danish_00"),
-            ],
-            [Button.url("Fork Maintainer", url="t.me/Col_serra")],
-        ],
-    )
+    """
+    Get help text.
+    """
+    if not user_is_allowed(event.sender_id):
+        return await event.delete()
+    await event.reply(HELP_TEXT)
 
 
 async def temp_unauth(event, args, client):
@@ -279,72 +237,3 @@ async def temp_auth(event, args, client):
     )
 
 
-async def icommands(event):
-    s = conf.CMD_SUFFIX or str()
-    await event.edit(
-        f"""`
-start{s} - check if bot is awake and get usage.
-restart{s} -  restart bot
-update{s} - update bot
-nuke{s} - ☢️ nuke bot
-bash{s} - /bash + command
-eval{s} - evaluate code
-pause{s} - prevent bot from encoding
-peval{s} - same as eval but with pyrogram
-ping - ping!
-permit{s} - add a temporary user
-unpermit{s} - removes a temporary user
-add{s} - add video to queue
-l{s} - add link to queue
-ql{s} - add torrent link to queue
-s{s} - select files from torrent to encode
-queue{s} - list queue
-batch{s} - preview batches
-list{s} - list all files in a torrent
-forward{s} - manually forward a message to fchannel
-v{s} - turn v2,3,4… on (with message) or off
-download{s} - download a file or link to bot
-upload{s} - upload from a local directory or link
-rename{s} - rename a video file/link
-m{s} - get the media info of a replied file/link
-mux{s} - remux a file
-get{s} - get current ffmpeg code
-set{s} - set custom ffmpeg code
-reset{s} - reset default ffmpeg code
-mset{s} - set, reset, disable mux_args
-mget{s} - view current mux_args
-filter{s} - filter & stuff
-vfilter{s} - view filter
-groupenc{s} - allow encoding in group toggle
-delfilter{s} - delete filter
-airing{s} - get anime airing info
-anime{s} - get anime info
-name{s} - quick filter with anime_title
-vname{s} - get list of name filter
-delname{s} - delete name filter
-setrename{s} - set custom_rename format
-rss{s} - edit, delete & subscribe rss feeds
-status{s} - 🆕 get bot's status
-showthumb{s} - 🖼️ show current thumbnail
-parse{s} - toggle parsing with captions or anilist
-groupenc{s} - turn off/on encoding in groups
-cancelall{s} - ❌ clear cached downloads & queued files
-clear{s} - clear queued files
-logs{s} - get bot logs
-help{s} - same as start
-
-Quality:
-144p{s} - set video quality to 144p
-240p{s} - set video quality to 240p
-360p{s} - set video quality to 360p
-480p{s} - set video quality to 480p
-720p{s} - set video quality to 720p
-1080p{s} - set video quality to 1080p
-2160p{s} - set video quality to 2160p
-defaultq{s} - set video quality to default
-`
-
-All above commands accept '-h' / '--help' arguments to get more detailed help about each command.
-        """,
-        buttons=[Button.inline("🔙 Back", data="ihelp")],
-    )

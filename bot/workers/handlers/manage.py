@@ -829,22 +829,7 @@ async def rmfilter(event, args, client):
         await logger(Exception)
 
 
-async def save_thumb(event, args, client):
-    """Save/replace default thumbnail"""
-    if not user_is_owner(event.sender_id):
-        return
-    if not event.photo:
-        return
-    if not event.is_private and not get_var("groupenc"):
-        rply = (
-            "`Ignoring…`\nTurn on encoding videos in groups with "
-            "`/groupenc on` to enable setting thumbnails in groups.\n"
-            "__This message shall self-destruct in 20 seconds.__"
-        )
-        return await msg_sleep_delete(event, rply, time=20)
-    s_remove(thumb)
-    await event.client.download_media(event.media, file=thumb)
-    await event.reply("**Thumbnail Saved Successfully.**")
+from .thumbnail import set_thumbnail as save_thumb
 
 
 async def pause(event, args, client):

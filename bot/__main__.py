@@ -21,20 +21,52 @@ from pyrogram import filters
 from . import LOGS, conf, events, pyro, re, tele
 from .startup.after import on_startup
 from .utils.msg_utils import event_handler
+from .workers.handlers.admin import (
+    clear_queue,
+    restart_bot,
+    view_queue,
+)
+from .workers.handlers.admin_config import (
+    set_audio_bitrate,
+    set_crf,
+    set_preset,
+    set_video_codec,
+)
+from .workers.handlers.admin_adv import (
+    add_channel,
+    delete_channel,
+    fsub_mode,
+    list_channels,
+    add_paid_user,
+    remove_paid_user,
+    list_paid_users,
+    update_bot,
+)
+from .workers.handlers.shortner import (
+    set_shortner,
+    set_shortlink1,
+    set_shortlink2,
+    set_tutorial1,
+)
+from .workers.handlers.audio import (
+    add_audio,
+    extract_audio,
+    remove_audio,
+)
 from .workers.handlers.dev import bash
 from .workers.handlers.dev import eval as eval_
-from .workers.handlers.dev import (
-    eval_message_p,
-    quality_1080p,
-    quality_144p,
-    quality_2160p,
-    quality_240p,
-    quality_360p,
-    quality_480p,
-    quality_720p,
-    quality_default,
-)
+from .workers.handlers.dev import eval_message_p
 from .workers.handlers.e_callbacks import pres, skip, skip_jobs, stats
+from .workers.handlers.encode import (
+    encode_1080p,
+    encode_144p,
+    encode_2160p,
+    encode_240p,
+    encode_360p,
+    encode_480p,
+    encode_720p,
+    encode_all,
+)
 from .workers.handlers.manage import (
     allowgroupenc,
     auto_rename,
@@ -52,7 +84,6 @@ from .workers.handlers.manage import (
     nuke,
     pause,
     reffmpeg,
-    restart,
     rmfilter,
     rss_handler,
     save_thumb,
@@ -62,43 +93,62 @@ from .workers.handlers.manage import (
     version2,
     vfilter,
 )
+from .workers.handlers.misc import (
+    get_media_info,
+    set_media_type,
+    upload_file,
+)
 from .workers.handlers.queue import (
     addqueue,
-    clearqueue,
     edit_batch,
     enleech,
     enleech2,
     enselect,
-    listqueue,
     pencode,
     pencode_callback,
 )
 from .workers.handlers.rebut import (
     en_airing,
     en_anime,
-    en_download,
     en_list,
     en_mux,
     en_rename,
-    en_upload,
     getlogs,
-    getminfo,
-    getthumb,
 )
-from .workers.handlers.stuff import beck
 from .workers.handlers.stuff import help as help_
-from .workers.handlers.stuff import (
-    icommands,
-    ihelp,
-    start,
-    status,
-    temp_auth,
-    temp_unauth,
-    up,
+from .workers.handlers.stuff import start, status, temp_auth, temp_unauth, up
+from .workers.handlers.subtitles import (
+    add_hardcoded_subtitles,
+    add_subtitles,
+    extract_subtitles,
+    remove_subtitles,
 )
+from .workers.handlers.thumbnail import (
+    delete_thumbnail,
+    extract_thumbnail,
+    get_thumbnail,
+    set_thumbnail,
+)
+from .workers.handlers.video_manipulation import (
+    compress_video,
+    crop_video,
+    cut_video,
+    merge_videos,
+    rename_video,
+)
+from .workers.handlers.watermark import (
+    add_watermark,
+    get_watermark,
+    set_watermark,
+    spoiler,
+)
+
+from .config_manager import load_config
 
 cmd_suffix = conf.CMD_SUFFIX.strip()
 LOGS.info("Starting...")
+
+load_config()
 
 
 ######## Connect ########
@@ -151,65 +201,288 @@ async def _(e):
     await event_handler(e, help_)
 
 
-@tele.on(events.NewMessage(pattern=command(["showthumb"])))
-async def _(e):
-    await event_handler(e, getthumb)
-
-
 @tele.on(events.NewMessage(pattern=command(["status"])))
 async def _(e):
     await event_handler(e, status)
 
 
-####### QUALITY CMDS #######
+####### THUMBNAIL CMDS #######
+
+
+@tele.on(events.NewMessage(pattern=command(["setthumb"])))
+async def _(e):
+    await event_handler(e, set_thumbnail)
+
+
+@tele.on(events.NewMessage(pattern=command(["getthumb"])))
+async def _(e):
+    await event_handler(e, get_thumbnail)
+
+
+@tele.on(events.NewMessage(pattern=command(["delthumb"])))
+async def _(e):
+    await event_handler(e, delete_thumbnail)
+
+
+@tele.on(events.NewMessage(pattern=command(["extract_thumb"])))
+async def _(e):
+    await event_handler(e, extract_thumbnail)
+
+
+####### WATERMARK CMDS #######
+
+
+@tele.on(events.NewMessage(pattern=command(["setwatermark"])))
+async def _(e):
+    await event_handler(e, set_watermark)
+
+
+@tele.on(events.NewMessage(pattern=command(["getwatermark"])))
+async def _(e):
+    await event_handler(e, get_watermark)
+
+
+@tele.on(events.NewMessage(pattern=command(["addwatermark"])))
+async def _(e):
+    await event_handler(e, add_watermark)
+
+
+@tele.on(events.NewMessage(pattern=command(["spoiler"])))
+async def _(e):
+    await event_handler(e, spoiler)
+
+
+####### VIDEO MANIPULATION CMDS #######
+
+
+@tele.on(events.NewMessage(pattern=command(["compress"])))
+async def _(e):
+    await event_handler(e, compress_video)
+
+
+@tele.on(events.NewMessage(pattern=command(["cut"])))
+async def _(e):
+    await event_handler(e, cut_video)
+
+
+@tele.on(events.NewMessage(pattern=command(["crop"])))
+async def _(e):
+    await event_handler(e, crop_video)
+
+
+@tele.on(events.NewMessage(pattern=command(["merge"])))
+async def _(e):
+    await event_handler(e, merge_videos)
+
+
+####### ENCODING & RESOLUTION CMDS #######
 
 
 @tele.on(events.NewMessage(pattern=command(["144p"])))
 async def _(e):
-    await event_handler(e, quality_144p)
+    await event_handler(e, encode_144p)
 
 
 @tele.on(events.NewMessage(pattern=command(["240p"])))
 async def _(e):
-    await event_handler(e, quality_240p)
+    await event_handler(e, encode_240p)
 
 
 @tele.on(events.NewMessage(pattern=command(["360p"])))
 async def _(e):
-    await event_handler(e, quality_360p)
+    await event_handler(e, encode_360p)
 
 
 @tele.on(events.NewMessage(pattern=command(["480p"])))
 async def _(e):
-    await event_handler(e, quality_480p)
+    await event_handler(e, encode_480p)
 
 
 @tele.on(events.NewMessage(pattern=command(["720p"])))
 async def _(e):
-    await event_handler(e, quality_720p)
+    await event_handler(e, encode_720p)
 
 
 @tele.on(events.NewMessage(pattern=command(["1080p"])))
 async def _(e):
-    await event_handler(e, quality_1080p)
+    await event_handler(e, encode_1080p)
 
 
 @tele.on(events.NewMessage(pattern=command(["2160p"])))
 async def _(e):
-    await event_handler(e, quality_2160p)
+    await event_handler(e, encode_2160p)
 
 
-@tele.on(events.NewMessage(pattern=command(["defaultq"])))
+@tele.on(events.NewMessage(pattern=command(["all"])))
 async def _(e):
-    await event_handler(e, quality_default)
+    await event_handler(e, encode_all)
 
 
-####### POWER CMDS #######
+####### SUBTITLE CMDS #######
+
+
+@tele.on(events.NewMessage(pattern=command(["sub"])))
+async def _(e):
+    await event_handler(e, add_subtitles)
+
+
+@tele.on(events.NewMessage(pattern=command(["hsub"])))
+async def _(e):
+    await event_handler(e, add_hardcoded_subtitles)
+
+
+@tele.on(events.NewMessage(pattern=command(["rsub"])))
+async def _(e):
+    await event_handler(e, remove_subtitles)
+
+
+@tele.on(events.NewMessage(pattern=command(["extract_sub"])))
+async def _(e):
+    await event_handler(e, extract_subtitles)
+
+
+####### AUDIO CMDS #######
+
+
+@tele.on(events.NewMessage(pattern=command(["extract_audio"])))
+async def _(e):
+    await event_handler(e, extract_audio)
+
+
+@tele.on(events.NewMessage(pattern=command(["addaudio"])))
+async def _(e):
+    await event_handler(e, add_audio)
+
+
+@tele.on(events.NewMessage(pattern=command(["remaudio"])))
+async def _(e):
+    await event_handler(e, remove_audio)
+
+
+####### MISC CMDS #######
+
+
+@tele.on(events.NewMessage(pattern=command(["setmedia"])))
+async def _(e):
+    await event_handler(e, set_media_type)
+
+
+
+
+@tele.on(events.NewMessage(pattern=command(["mediainfo"])))
+async def _(e):
+    await event_handler(e, get_media_info)
+
+
+@tele.on(events.NewMessage(pattern=command(["upload"])))
+async def _(e):
+    await event_handler(e, upload_file)
+
+
+####### ADMIN CMDS #######
 
 
 @tele.on(events.NewMessage(pattern=command(["restart"])))
 async def _(e):
-    await event_handler(e, restart)
+    await event_handler(e, restart_bot)
+
+
+@tele.on(events.NewMessage(pattern=command(["queue"])))
+async def _(e):
+    await event_handler(e, view_queue)
+
+
+@tele.on(events.NewMessage(pattern=command(["clear"])))
+async def _(e):
+    await event_handler(e, clear_queue)
+
+
+@tele.on(events.NewMessage(pattern=command(["audio"])))
+async def _(e):
+    await event_handler(e, set_audio_bitrate)
+
+
+@tele.on(events.NewMessage(pattern=command(["codec"])))
+async def _(e):
+    await event_handler(e, set_video_codec)
+
+
+@tele.on(events.NewMessage(pattern=command(["preset"])))
+async def _(e):
+    await event_handler(e, set_preset)
+
+
+@tele.on(events.NewMessage(pattern=command(["crf"])))
+async def _(e):
+    await event_handler(e, set_crf)
+
+
+@tele.on(events.NewMessage(pattern=command(["addchnl"])))
+async def _(e):
+    await event_handler(e, add_channel)
+
+
+@tele.on(events.NewMessage(pattern=command(["delchnl"])))
+async def _(e):
+    await event_handler(e, delete_channel)
+
+
+@tele.on(events.NewMessage(pattern=command(["listchnl"])))
+async def _(e):
+    await event_handler(e, list_channels)
+
+
+@tele.on(events.NewMessage(pattern=command(["addpaid"])))
+async def _(e):
+    await event_handler(e, add_paid_user)
+
+
+@tele.on(events.NewMessage(pattern=command(["rempaid"])))
+async def _(e):
+    await event_handler(e, remove_paid_user)
+
+
+@tele.on(events.NewMessage(pattern=command(["listpaid"])))
+async def _(e):
+    await event_handler(e, list_paid_users)
+
+
+@tele.on(events.NewMessage(pattern=command(["fsub_mode"])))
+async def _(e):
+    await event_handler(e, fsub_mode)
+
+
+@tele.on(events.NewMessage(pattern=command(["update"])))
+async def _(e):
+    await event_handler(e, update_bot)
+
+
+@tele.on(events.NewMessage(pattern=command(["shortner"])))
+async def _(e):
+    await event_handler(e, set_shortner)
+
+
+@tele.on(events.NewMessage(pattern=command(["shortlink1"])))
+async def _(e):
+    await event_handler(e, set_shortlink1)
+
+
+@tele.on(events.NewMessage(pattern=command(["shortlink2"])))
+async def _(e):
+    await event_handler(e, set_shortlink2)
+
+
+@tele.on(events.NewMessage(pattern=command(["tutorial1"])))
+async def _(e):
+    await event_handler(e, set_tutorial1)
+
+
+@tele.on(events.NewMessage(pattern=command(["rename"])))
+async def _(e):
+    await event_handler(e, rename_video)
+
+
+####### POWER CMDS #######
 
 
 @tele.on(events.NewMessage(pattern=command(["nuke"])))
@@ -340,19 +613,6 @@ async def _(e):
     await cancel_dl(e)
 
 
-@tele.on(events.callbackquery.CallbackQuery(data=re.compile("ihelp")))
-async def _(e):
-    await ihelp(e)
-
-
-@tele.on(events.callbackquery.CallbackQuery(data=re.compile("icommands")))
-async def _(e):
-    await icommands(e)
-
-
-@tele.on(events.callbackquery.CallbackQuery(data=re.compile("beck")))
-async def _(e):
-    await beck(e)
 
 
 @tele.on(events.callbackquery.CallbackQuery(data=re.compile(b"quality_(.*)")))
