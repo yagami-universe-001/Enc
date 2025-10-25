@@ -746,53 +746,23 @@ async def enselect(event, args, client):
         await logger(Exception)
 
 
-async def pencode(message, args=None, sender_id=None, flag=None):
+async def enqueue_with_quality(event, quality):
+    """Adds a replied video to the queue with the specified quality."""
     try:
-        if not (message.from_user or sender_id):
-            return await msg_sleep_delete(message, f"`{enquip4()}`", time=20)
-        chat_id = message.chat.id
-        sender_id = sender_id or message.from_user.id
-        if sender_id != chat_id and not get_var("groupenc"):
-            return await msg_sleep_delete(
-                message,
-                "**Pm me with files to encode instead\nOR\nSend** `/groupenc on` **to turn on group encoding!**\n__This message will self destruct in 10 seconds__",
+        if not user_is_allowed(event.sender_id):
+            return await try_delete(event)
+        if not event.is_reply:
+            return await event.reply("Command needs to be a replied message.")
+
+        message = await event.get_reply_message()
+        if not (
+            message
+            and (
+                message.video
+                or (message.document and message.document.mime_type in video_mimetype)
             )
-        if not (user_is_allowed(chat_id) or user_is_allowed(sender_id)):
-            return await message.delete()
-        if message.document:
-            if message.document.mime_type not in video_mimetype:
-                return
-
-        buttons = [
-            [
-                Button.inline("144p", data=f"quality_144p_{message.id}"),
-                Button.inline("240p", data=f"quality_240p_{message.id}"),
-                Button.inline("360p", data=f"quality_360p_{message.id}"),
-                Button.inline("480p", data=f"quality_480p_{message.id}"),
-            ],
-            [
-                Button.inline("720p", data=f"quality_720p_{message.id}"),
-                Button.inline("1080p", data=f"quality_1080p_{message.id}"),
-                Button.inline("2160p", data=f"quality_2160p_{message.id}"),
-                Button.inline("Default", data=f"quality_default_{message.id}"),
-            ],
-        ]
-        await tele.send_message(
-            message.chat.id,
-            "Please select a quality to encode the video to:",
-            buttons=buttons,
-            reply_to=message.id,
-        )
-    except BaseException:
-        await logger(BaseException)
-
-
-async def pencode_callback(event):
-    try:
-        quality, message_id = event.data.decode().split("_")[1:]
-        message = await event.client.get_messages(event.chat_id, ids=int(message_id))
-        if not message:
-            return await event.answer("This message is no longer available.", alert=True)
+        ):
+            return await event.reply("Please reply to a video message.")
 
         sender_id = event.sender_id
         chat_id = event.chat_id
@@ -801,12 +771,17 @@ async def pencode_callback(event):
 
         for item in queue.values():
             if name in item:
-                return await event.answer("This file is already in the queue.", alert=True)
+                return await event.reply("This file is already in the queue.")
 
         if quality == "default":
             quality = None
 
-        args = message.text
+        args = event.text.split(" ", 1)
+        if len(args) > 1:
+            args = args[1]
+        else:
+            args = None
+
         anilist = True
         cust_fil = cust_v = str()
         force_name = None
@@ -851,25 +826,42 @@ async def pencode_callback(event):
             }
         )
         await save2db()
-        await event.edit(f"Added to queue with quality: {quality or 'default'}")
+        await event.reply(f"Added to queue with quality: {quality or 'default'}")
     except Exception as e:
         await logger(e)
-        await event.answer("An error occurred.", alert=True)
+        await event.reply("An error occurred.")
 
 
-async def add_multi(message, args, sender_id, flag):
-    if args and args.isdigit():
-        args = int(args) - 1
-        if args < 1:
-            return
-        else:
-            args = str(args)
-        media = await message._client.get_messages(message.chat.id, message.id + 1)
-        if media.empty or not (media.document or media.video):
-            return
-        await asyncio.sleep(3)
-        asyncio.create_task(pencode(media, args, sender_id, flag))
-        return
+async def p144(event, client):
+    await enqueue_with_quality(event, "144p")
+
+
+async def p240(event, client):
+    await enqueue_with_quality(event, "240p")
+
+
+async def p360(event, client):
+    await enqueue_with_quality(event, "360p")
+
+
+async def p480(event, client):
+    await enqueue_with_quality(event, "480p")
+
+
+async def p720(event, client):
+    await enqueue_with_quality(event, "720p")
+
+
+async def p1080(event, client):
+    await enqueue_with_quality(event, "1080p")
+
+
+async def p2160(event, client):
+    await enqueue_with_quality(event, "2160p")
+
+
+async def pdefault(event, client):
+    await enqueue_with_quality(event, "default")
 
 
 async def addqueue(event, args, client):
@@ -887,10 +879,7 @@ async def addqueue(event, args, client):
     try:
         event_2 = await event.get_reply_message()
         if event_2.file:
-            media = await client.get_messages(event.chat_id, event_2.id)
-            if media.empty:
-                return await event.reply("Try again!")
-            await pencode(media, args, user_id)
+            await enqueue_with_quality(event, "default")
             return
         if not user_is_owner(user_id):
             return

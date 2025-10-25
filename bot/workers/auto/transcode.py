@@ -1,6 +1,7 @@
 from os.path import split as path_split
 from os.path import splitext as split_ext
 from shutil import copy2 as copy_file
+import shlex
 
 from bot import asyncio, mux_file, pyro, tele, time
 from bot.config import conf
@@ -346,7 +347,7 @@ async def thing():
         _set = time.time()
         einfo.current = file_name
         einfo._current = name
-        cmd = ffmpeg.format(dl, out).split()
+        cmd = shlex.split(ffmpeg.format(dl, out))
         encode = encoder(_id, sender, msg_t, op, True)
         # await mssg_r.edit("`Waiting For Encoding To Complete`")
         await encode.start(*cmd)
@@ -400,7 +401,7 @@ async def thing():
             mux_args = await another(mux_args, title, epi, sn, metadata_name, o_out)
             ffmpeg = 'ffmpeg -i """{}""" ' f"{mux_args} -codec copy" ' """{}""" -y'
             _out = split_ext(out)[0] + " [Muxing]" + split_ext(out)[1]
-            cmd = ffmpeg.format(o_out, _out).split()
+            cmd = shlex.split(ffmpeg.format(o_out, _out))
             encode = encoder(_id, event=msg_t)
             await encode.start(*cmd)
             stderr = (await encode.await_completion())[1]

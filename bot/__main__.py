@@ -104,8 +104,14 @@ from .workers.handlers.queue import (
     enleech,
     enleech2,
     enselect,
-    pencode,
-    pencode_callback,
+    p144,
+    p240,
+    p360,
+    p480,
+    p720,
+    p1080,
+    p2160,
+    pdefault,
 )
 from .workers.handlers.rebut import (
     en_airing,
@@ -280,37 +286,37 @@ async def _(e):
 
 @tele.on(events.NewMessage(pattern=command(["144p"])))
 async def _(e):
-    await event_handler(e, encode_144p)
+    await event_handler(e, p144)
 
 
 @tele.on(events.NewMessage(pattern=command(["240p"])))
 async def _(e):
-    await event_handler(e, encode_240p)
+    await event_handler(e, p240)
 
 
 @tele.on(events.NewMessage(pattern=command(["360p"])))
 async def _(e):
-    await event_handler(e, encode_360p)
+    await event_handler(e, p360)
 
 
 @tele.on(events.NewMessage(pattern=command(["480p"])))
 async def _(e):
-    await event_handler(e, encode_480p)
+    await event_handler(e, p480)
 
 
 @tele.on(events.NewMessage(pattern=command(["720p"])))
 async def _(e):
-    await event_handler(e, encode_720p)
+    await event_handler(e, p720)
 
 
 @tele.on(events.NewMessage(pattern=command(["1080p"])))
 async def _(e):
-    await event_handler(e, encode_1080p)
+    await event_handler(e, p1080)
 
 
 @tele.on(events.NewMessage(pattern=command(["2160p"])))
 async def _(e):
-    await event_handler(e, encode_2160p)
+    await event_handler(e, p2160)
 
 
 @tele.on(events.NewMessage(pattern=command(["all"])))
@@ -613,13 +619,6 @@ async def _(e):
     await cancel_dl(e)
 
 
-
-
-@tele.on(events.callbackquery.CallbackQuery(data=re.compile(b"quality_(.*)")))
-async def _(e):
-    await pencode_callback(e)
-
-
 ########## Direct ###########
 
 
@@ -750,11 +749,6 @@ async def _(e):
 # @tele.on(events.NewMessage(incoming=True))
 # async def _(e):
 #    await encod(e)
-
-
-@pyro.on_message(filters.incoming & (filters.video | filters.document))
-async def _(pyro, message):
-    await pencode(message)
 
 
 ########### Start ############
