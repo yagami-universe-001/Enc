@@ -13,6 +13,7 @@ from bot.utils.bot_utils import (
 )
 from bot.utils.log_utils import log, logger
 from bot.utils.os_utils import parse_dl, s_remove
+from telethon.tl.types import InlineKeyboardButton
 
 from .dl_helpers import (
     get_files_from_torrent,
@@ -353,14 +354,13 @@ class Downloader:
                 else:
                     reply_markup.extend(([more_button], [back_button], [cancel_button]))
                     dsp = dl_info
-                reply_markup = InlineKeyboardMarkup(reply_markup)
 
                 # Use the telethon client to edit the message
                 if self.message:
                     await tele.edit_message(
                         self.message,
                         dsp,
-                        buttons=self.gen_buttons()
+                        buttons=reply_markup
                     )
 
             except errors.rpcerrorlist.MessageNotModifiedError:
