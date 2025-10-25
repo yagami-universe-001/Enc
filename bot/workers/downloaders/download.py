@@ -13,7 +13,6 @@ from bot.utils.bot_utils import (
 )
 from bot.utils.log_utils import log, logger
 from bot.utils.os_utils import parse_dl, s_remove
-from telethon.tl.types import InlineKeyboardButton
 
 from .dl_helpers import (
     get_files_from_torrent,
@@ -337,14 +336,18 @@ class Downloader:
             )
             try:
                 # Attach the button to the message with an inline keyboard
-                reply_markup = []
                 dl_info = await parse_dl(self.file_name)
-                (
-                    info_button,
-                    more_button,
-                    back_button,
-                    cancel_button,
-                ) = self.gen_buttons()
+
+                # Create telethon-specific buttons
+                cancel_button = Button.inline(f"{enmoji()} Cancel Download", data=self.callback_data)
+                if self.dl_info:
+                    info_button = Button.inline("ℹ️", data=self.callback_data_i)
+                    more_button = Button.inline("More…", data=f"more 0")
+                    back_button = Button.inline("↩️", data=self.callback_data_b)
+                else:
+                    info_button, more_button, back_button = None, None, None
+
+                reply_markup = []
                 if not self.dl_info:
                     reply_markup.append([cancel_button])
                     dsp = "{}\n{}".format(ud_type, tmp)
