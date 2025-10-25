@@ -34,6 +34,7 @@ class Config:
             self.C_LINK = config("C_LINK", default="@ANi_MiNE")
             self.CMD_SUFFIX = config("CMD_SUFFIX", default=str())
             self.COMP_MODE = config("COMPATIBILITY_MODE", default=True, cast=bool)
+            self.CRF = config("CRF", default=None)
             self.CUSTOM_RENAME = config("CUSTOM_RENAME", default=None)
             self.DATABASE_URL = config("DATABASE_URL", default=None)
             self.DBNAME = config("DBNAME", default="ENC")
@@ -69,6 +70,7 @@ class Config:
             self.OVR = config("OVR", default=None)
             self.OWNER = config("OWNER")
             self.PAUSE_ON_DL_INFO = config("PODI", default=True, cast=bool)
+            self.PRESET = config("PRESET", default=None)
             self.QDL_TIMEOUT = config("QBIT_DL_TIMEOUT", default=0, cast=int)
             self.QBIT_PORT = config("QBIT_PORT", default=8090, cast=int)
             self.QBIT_PORT2 = config("QBIT_PORT2", default=9090, cast=int)
@@ -97,6 +99,7 @@ class Config:
             self.USE_ANILIST = config("USE_ANILIST", default=True, cast=bool)
             self.USE_CAPTION = config("USE_CAPTION", default=True, cast=bool)
             self.UVS = config("UPLOAD_VIDEO_AS_SPOILER", default=False, cast=bool)
+            self.VIDEO_CODEC = config("VIDEO_CODEC", default=None)
             self.WORKERS = config("WORKERS", default=2, cast=int)
         except Exception:
             print("Environment vars Missing; or")

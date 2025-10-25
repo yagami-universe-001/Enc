@@ -119,6 +119,7 @@ from .workers.handlers.rebut import (
     en_list,
     en_mux,
     en_rename,
+    en_upload,
     getlogs,
 )
 from .workers.handlers.stuff import help as help_

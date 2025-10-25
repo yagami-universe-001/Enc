@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 from functools import partial
 
 import pyrogram
@@ -503,4 +504,18 @@ async def event_handler(
         if disable_help:
             return
         return await reply_message(event, f"`{function.__doc__}`")
-    await function(event, args, client)
+
+    # Inspect the function signature
+    sig = inspect.signature(function)
+    params = sig.parameters
+
+    # Prepare the arguments to be passed
+    func_args = []
+    if "event" in params:
+        func_args.append(event)
+    if "args" in params:
+        func_args.append(args)
+    if "client" in params:
+        func_args.append(client)
+
+    await function(*func_args)
