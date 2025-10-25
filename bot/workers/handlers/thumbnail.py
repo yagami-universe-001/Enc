@@ -100,9 +100,7 @@ async def extract_thumbnail(event, args, client):
 
     input_file = await event.client.download_media(reply_message)
     output_file = f"thumbnail_{os.path.basename(input_file)}.jpg"
-    thumbnail = await run_sync_in_thread(
-        extract_thumb_func, input_file, output_file
-    )
+    thumbnail = await extract_thumb_func(input_file, output_file)
     os.remove(input_file)
     if thumbnail:
         await event.reply(file=thumbnail)

@@ -29,9 +29,9 @@ class Encoder:
     def __str__(self):
         return "#WIP"
 
-    async def start(self, cmd):
-        process = await asyncio.create_subprocess_shell(
-            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    async def start(self, *cmd):
+        process = await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
         self.process = process
         return process

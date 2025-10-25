@@ -40,7 +40,7 @@ async def extract_audio(event, args, client, reply_message):
     ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -96,7 +96,7 @@ async def add_audio(event, args, client):
         ]
 
         encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-        await encoder.start(" ".join(cmd))
+        await encoder.start(*cmd)
         await encoder.callback(input_file, output_file, event, user_id)
         stdout, stderr = await encoder.await_completion()
 
@@ -124,7 +124,7 @@ async def remove_audio(event, args, client, reply_message):
     cmd = ["ffmpeg", "-i", input_file, "-an", output_file]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 

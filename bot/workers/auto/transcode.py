@@ -346,10 +346,10 @@ async def thing():
         _set = time.time()
         einfo.current = file_name
         einfo._current = name
-        cmd = ffmpeg.format(dl, out)
+        cmd = ffmpeg.format(dl, out).split()
         encode = encoder(_id, sender, msg_t, op, True)
         # await mssg_r.edit("`Waiting For Encoding To Complete`")
-        await encode.start(cmd)
+        await encode.start(*cmd)
         await encode.callback(dl, out, msg_t, sender_id, stime=_set)
         stdout, stderr = await encode.await_completion()
         await report_encode_status(
@@ -400,9 +400,9 @@ async def thing():
             mux_args = await another(mux_args, title, epi, sn, metadata_name, o_out)
             ffmpeg = 'ffmpeg -i """{}""" ' f"{mux_args} -codec copy" ' """{}""" -y'
             _out = split_ext(out)[0] + " [Muxing]" + split_ext(out)[1]
-            cmd = ffmpeg.format(o_out, _out)
+            cmd = ffmpeg.format(o_out, _out).split()
             encode = encoder(_id, event=msg_t)
-            await encode.start(cmd)
+            await encode.start(*cmd)
             stderr = (await encode.await_completion())[1]
             await report_encode_status(
                 encode.process,

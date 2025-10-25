@@ -39,7 +39,7 @@ async def _encode_resolution(event, client, resolution, reply_message, input_fil
     ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 

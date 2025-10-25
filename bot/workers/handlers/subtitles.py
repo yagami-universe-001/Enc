@@ -55,7 +55,7 @@ async def add_subtitles(event, args, client):
         ]
 
         encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-        await encoder.start(" ".join(cmd))
+        await encoder.start(*cmd)
         await encoder.callback(input_file, output_file, event, user_id)
         stdout, stderr = await encoder.await_completion()
 
@@ -104,7 +104,7 @@ async def add_hardcoded_subtitles(event, args, client):
         ]
 
         encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-        await encoder.start(" ".join(cmd))
+        await encoder.start(*cmd)
         await encoder.callback(input_file, output_file, event, user_id)
         stdout, stderr = await encoder.await_completion()
 
@@ -135,7 +135,7 @@ async def remove_subtitles(event, args, client, reply_message):
     cmd = ["ffmpeg", "-i", input_file, "-sn", output_file]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -176,7 +176,7 @@ async def extract_subtitles(event, args, client, reply_message):
         cmd = ["ffmpeg", "-i", input_file, "-map", f"0:{index}", output_file]
 
         encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-        await encoder.start(" ".join(cmd))
+        await encoder.start(*cmd)
         await encoder.callback(input_file, output_file, event, user_id)
         stdout, stderr = await encoder.await_completion()
 

@@ -44,7 +44,7 @@ async def compress_video(event, args, client, reply_message):
     ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -91,7 +91,7 @@ async def cut_video(event, args, client, reply_message):
     ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -133,7 +133,7 @@ async def crop_video(event, args, client, reply_message):
     ]
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_file, output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
@@ -222,7 +222,7 @@ async def merge_videos(event, args, client):
     ])
 
     encoder = Encoder(f"{event.chat_id}:{event.id}", event=event)
-    await encoder.start(" ".join(cmd))
+    await encoder.start(*cmd)
     await encoder.callback(input_files[0], output_file, event, user_id)
     stdout, stderr = await encoder.await_completion()
 
